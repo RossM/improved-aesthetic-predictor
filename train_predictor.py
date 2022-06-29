@@ -21,20 +21,7 @@ class MLP(pl.LightningModule):
         self.xcol = xcol
         self.ycol = ycol
         self.layers = nn.Sequential(
-            nn.Linear(self.input_size, 1024),
-            #nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(1024, 128),
-            #nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(128, 64),
-            #nn.ReLU(),
-            nn.Dropout(0.1),
-
-            nn.Linear(64, 16),
-            #nn.ReLU(),
-
-            nn.Linear(16, 1)
+            nn.Linear(self.input_size, 1),
         )
 
     def forward(self, x):
@@ -55,20 +42,20 @@ class MLP(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=0.1)
         return optimizer
 
 
 
 # load the training data 
 
-x = np.load ("/mnt/spirit/ava_x.npy")
+x = np.load ("/mnt/rossm/x_logos_oai.npy")
 
-y = np.load ("/mnt/spirit/ava_y.npy")
+y = np.load ("/mnt/rossm/y_logos_oai.npy")
 
 val_percentage = 0.05 # 5% of the trainingdata will be used for validation
 
-train_border = int(x.shape()[0] * (1 - val_percentage) )
+train_border = int(np.shape(x)[0] * (1 - val_percentage) )
 
 train_tensor_x = torch.Tensor(x[:train_border]) # transform to torch tensor
 train_tensor_y = torch.Tensor(y[:train_border])
@@ -97,7 +84,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = MLP(768).to(device)   # CLIP embedding dim is 768 for CLIP ViT L 14
 
-optimizer = torch.optim.Adam(model.parameters()) 
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-2) 
 
 # choose the loss you want to optimze for
 criterion = nn.MSELoss()
